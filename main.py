@@ -30,7 +30,7 @@ class ShopAssistant:
         if not moderation_flagged:
             response = openai.ChatCompletion.create(
                 model=self.model,
-                messages=self.get_message,
+                messages=message,
                 temperature=self.temp,  # this is the degree of randomness of the model's output
                 max_tokens=self.max_tokens,  # the maximum number of tokens the model can ouptut
             )
