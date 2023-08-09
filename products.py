@@ -1,51 +1,100 @@
-product_list_electronics = """
-1. Product: TechPro Ultrabook
-   Category: Computers and Laptops
-   Brand: TechPro
-   Model Number: TP-UB100
-   Warranty: 1 year
-   Rating: 4.5
-   Features: 13.3-inch display, 8GB RAM, 256GB SSD, Intel Core i5 processor
-   Description: A sleek and lightweight ultrabook for everyday use.
-   Price: $799.99
-
-2. Product: BlueWave Gaming Laptop
-   Category: Computers and Laptops
-   Brand: BlueWave
-   Model Number: BW-GL200
-   Warranty: 2 years
-   Rating: 4.7
-   Features: 15.6-inch display, 16GB RAM, 512GB SSD, NVIDIA GeForce RTX 3060
-   Description: A high-performance gaming laptop for an immersive experience.
-   Price: $1199.99
-
-3. Product: PowerLite Convertible
-   Category: Computers and Laptops
-   Brand: PowerLite
-   Model Number: PL-CV300
-   Warranty: 1 year
-   Rating: 4.3
-   Features: 14-inch touchscreen, 8GB RAM, 256GB SSD, 360-degree hinge
-   Description: A versatile convertible laptop with a responsive touchscreen.
-   Price: $699.99
-
-4. Product: TechPro Desktop
-   Category: Computers and Laptops
-   Brand: TechPro
-   Model Number: TP-DT500
-   Warranty: 1 year
-   Rating: 4.4
-   Features: Intel Core i7 processor, 16GB RAM, 1TB HDD, NVIDIA GeForce GTX 1660
-   Description: A powerful desktop computer for work and play.
-   Price: $999.99
-
-5. Product: BlueWave Chromebook
-   Category: Computers and Laptops
-   Brand: BlueWave
-   Model Number: BW-CB100
-   Warranty: 1 year
-   Rating: 4.1
-   Features: 11.6-inch display, 4GB RAM, 32GB eMMC, Chrome OS
-   Description: A compact and affordable Chromebook for everyday tasks.
-   Price: $249.99
-"""
+product_list_electronics = {"TechPro Ultrabook": {
+    "name": "TechPro Ultrabook",
+    "category": "Computers and Laptops",
+    "brand": "TechPro",
+    "model_number": "TP-UB100",
+    "warranty": "1 year",
+    "rating": 4.5,
+    "features": ["13.3-inch display", "8GB RAM", "256GB SSD", "Intel Core i5 processor"],
+    "description": "A sleek and lightweight ultrabook for everyday use.",
+    "price": 799.99
+},
+    "BlueWave Gaming Laptop": {
+        "name": "BlueWave Gaming Laptop",
+        "category": "Computers and Laptops",
+        "brand": "BlueWave",
+        "model_number": "BW-GL200",
+        "warranty": "2 years",
+        "rating": 4.7,
+        "features": ["15.6-inch display", "16GB RAM", "512GB SSD", "NVIDIA GeForce RTX 3060"],
+        "description": "A high-performance gaming laptop for an immersive experience.",
+        "price": 1199.99
+    },
+    "PowerLite Convertible": {
+        "name": "PowerLite Convertible",
+        "category": "Computers and Laptops",
+        "brand": "PowerLite",
+        "modelNumber": "PL-CV300",
+        "warranty": "1 year",
+        "rating": 4.3,
+        "features": "14-inch touchscreen, 8GB RAM, 256GB SSD, 360-degree hinge",
+        "description": "A versatile convertible laptop with a responsive touchscreen.",
+        "price": "$699.99"
+    },
+    "TechPro Desktop": {
+        "name": "TechPro Desktop",
+        "category": "Computers and Laptops",
+        "brand": "TechPro",
+        "modelNumber": "TP-DT500",
+        "warranty": "1 year",
+        "rating": 4.4,
+        "features": "Intel Core i7 processor, 16GB RAM, 1TB HDD, NVIDIA GeForce GTX 1660",
+        "description": "A powerful desktop computer for work and play.",
+        "price": "$999.99"
+    },
+    "Samsung QLED TV": {
+        "name": "Samsung QLED TV",
+        "category": "TV",
+        "brand": "Samsung",
+        "modelNumber": "QLED-TV100",
+        "warranty": "2 years",
+        "rating": 4.8,
+        "features": "55-inch display, 4K resolution, Quantum Dot technology",
+        "description": "Experience stunning visuals with vibrant colors on this QLED TV.",
+        "price": "$1499.99"
+    },
+    "LG OLED TV": {
+        "name": "LG OLED TV",
+        "category": "TV",
+        "brand": "LG",
+        "modelNumber": "OLED-TV200",
+        "warranty": "2 years",
+        "rating": 4.9,
+        "features": "65-inch display, 4K resolution, OLED technology",
+        "description": "Immerse yourself in lifelike picture quality with deep blacks and rich colors.",
+        "price": "$1999.99"
+    },
+    "Sony LED TV": {
+        "name": "Sony LED TV",
+        "category": "TV",
+        "brand": "Sony",
+        "modelNumber": "LED-TV300",
+        "warranty": "1 year",
+        "rating": 4.7,
+        "features": "50-inch display, Full HD resolution, Smart TV functionality",
+        "description": "Enjoy a smart and connected TV experience with this Sony LED TV.",
+        "price": "$799.99"
+    },
+    "Panasonic Plasma TV": {
+        "name": "Panasonic Plasma TV",
+        "category": "TV",
+        "brand": "Panasonic",
+        "modelNumber": "Plasma-TV400",
+        "warranty": "1 year",
+        "rating": 4.5,
+        "features": "60-inch display, 1080p resolution, Plasma technology",
+        "description": "Get a cinematic viewing experience with deep blacks and smooth motion.",
+        "price": "$1299.99"
+    },
+    "TCL Roku TV": {
+        "name": "TCL Roku TV",
+        "category": "TV",
+        "brand": "TCL",
+        "modelNumber": "Roku-TV500",
+        "warranty": "1 year",
+        "rating": 4.6,
+        "features": "43-inch display, 4K resolution, Roku OS",
+        "description": "Stream your favorite content with ease on this TCL Roku TV.",
+        "price": "$1299.99"
+    },
+}

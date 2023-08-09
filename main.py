@@ -1,3 +1,4 @@
+import json
 import os
 import openai
 import tiktoken
@@ -59,11 +60,55 @@ class ShopAssistant:
     def get_moderation_pass(msg):
         return openai.Moderation.create(input=msg)["results"][0]['flagged']
 
+    @staticmethod
+    def read_string_to_list(input_string):
+        if input_string is None:
+            return None
+
+        try:
+            if isinstance(input_string, dict):
+                input_string = json.dumps(input_string)
+            input_string = input_string.replace("'", "\"")  # Replace single quotes with double quotes for valid JSON
+            data = json.loads(input_string)
+            return data
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON string")
+            return None
+
+    def generate_output_string(self, data_list):
+        output_string = ""
+
+        if data_list is None:
+            return output_string
+
+        for data in data_list:
+            try:
+                if "products" in data:
+                    products_list = data["products"]
+                    for product_name in products_list:
+                        product = self.get_product_by_name(product_name)
+                        if product:
+                            output_string += json.dumps(product, indent=4) + "\n"
+                        else:
+                            print(f"Error: Product '{product_name}' not found")
+                elif "category" in data:
+                    category_name = data["category"]
+                    category_products = self.get_products_by_category(category_name)
+                    for product in category_products:
+                        output_string += json.dumps(product, indent=4) + "\n"
+                else:
+                    print("Error: Invalid object format")
+            except Exception as e:
+                print(f"Error: {e}")
+
+        return output_string
+
 
 assistant = ShopAssistant(
     list_of_products=product_list_electronics,
     template=template_electronic_shop
 )
+print(assistant.read_string_to_list(input_string=product_list_electronics))
 
-message = "What is more expensive BlueWave laptop or Black Addler nanobook?"
-print(assistant.get_completion_from_messages(messages=message))
+message = 'Customer: Hello, I have a problem with my order.'
+# print(assistant.get_completion_from_messages(messages=message))
