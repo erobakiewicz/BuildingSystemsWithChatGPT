@@ -18,6 +18,7 @@ class ShopAssistant:
     def __init__(self, template=None, list_of_products=None):
         self.template = template
         self.list_of_products = list_of_products
+        self.context = None
         self.products = None
         self.temp = 0
         self.model = "gpt-3.5-turbo"
@@ -25,17 +26,11 @@ class ShopAssistant:
 
     def get_completion_from_messages(self, messages):
         moderation_flagged = self.get_moderation_pass(messages)
+        message = self.get_message(messages)
         if not moderation_flagged:
             response = openai.ChatCompletion.create(
                 model=self.model,
-                messages=[
-                    {'role': 'system', 'content': self.template.format(
-                        self.delimiter, self.delimiter, self.list_of_products, self.delimiter, self.delimiter,
-                        self.delimiter, self.delimiter,
-                        self.delimiter)
-                     },
-                    {'role': 'user', 'content': f"{self.delimiter}{messages}{self.delimiter}"}
-                ],
+                messages=self.get_message,
                 temperature=self.temp,  # this is the degree of randomness of the model's output
                 max_tokens=self.max_tokens,  # the maximum number of tokens the model can ouptut
             )
@@ -102,6 +97,19 @@ class ShopAssistant:
                 print(f"Error: {e}")
 
         return output_string
+
+    def get_message(self, messages):
+        msg = [
+            {'role': 'system', 'content': self.template.format(
+                self.delimiter, self.delimiter, self.list_of_products, self.delimiter, self.delimiter,
+                self.delimiter, self.delimiter,
+                self.delimiter)
+             },
+            {'role': 'user', 'content': f"{self.delimiter}{messages}{self.delimiter}"}
+        ]
+        if self.context:
+            msg.append({'role': 'assistant', 'content': self.context})
+        return msg
 
 
 assistant = ShopAssistant(
