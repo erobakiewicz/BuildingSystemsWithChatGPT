@@ -1,4 +1,4 @@
-list_of_products = """
+product_list_electronics = """
 1. Product: TechPro Ultrabook
    Category: Computers and Laptops
    Brand: TechPro
