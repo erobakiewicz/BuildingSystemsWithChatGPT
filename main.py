@@ -15,10 +15,10 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 class ShopAssistant:
     delimiter = "####"
 
-    def __init__(self, template=None, list_of_products=None):
+    def __init__(self, template=None, list_of_products=None, context=None):
+        self.context = context
         self.template = template
         self.list_of_products = list_of_products
-        self.context = None
         self.products = None
         self.temp = 0
         self.model = "gpt-3.5-turbo"
@@ -114,9 +114,12 @@ class ShopAssistant:
 
 assistant = ShopAssistant(
     list_of_products=product_list_electronics,
-    template=template_electronic_shop
+    template=template_electronic_shop,
 )
-print(assistant.read_string_to_list(input_string=product_list_electronics))
 
-message = 'Customer: Hello, I have a problem with my order.'
-# print(assistant.get_completion_from_messages(messages=message))
+# case scenario when we know that user is looking only for TV
+user_context = assistant.generate_output_string(data_list=assistant.get_products_by_category("TV"))
+print(user_context)
+
+user_message = 'Customer: Hello, I want to buy a new TV with big screen.'
+print(assistant.get_completion_from_messages(messages=user_message))
