@@ -4,6 +4,7 @@ import openai
 import tiktoken
 from dotenv import load_dotenv, find_dotenv
 
+from context_cache import context_cache
 from products import product_list_electronics
 from template import template_electronic_shop
 
@@ -15,19 +16,33 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 class ShopAssistant:
     delimiter = "####"
 
-    def __init__(self, template=None, list_of_products=None, context=None):
+    def __init__(self, template=None, list_of_products=None, context='', moderation=True):
+        self.user_name = None
         self.context = context
         self.template = template
         self.list_of_products = list_of_products
+        self.moderation = moderation
         self.products = None
         self.temp = 0
         self.model = "gpt-3.5-turbo"
         self.max_tokens = 500
 
+    def main(self):
+        self.user_name = input("What is your name? ")
+        while True:
+            print('(type exit to quit)')
+            question = input("Question: ")
+            if question == "exit":
+                print("Bye!")
+                exit()
+            answer = self.get_completion_from_messages(question)
+            self.make_context(question, answer)
+            print(self.get_only_final_answer(answer))
+
     def get_completion_from_messages(self, messages):
         moderation_flagged = self.get_moderation_pass(messages)
         message = self.get_message(messages)
-        if not moderation_flagged:
+        if self.moderation and not moderation_flagged:
             response = openai.ChatCompletion.create(
                 model=self.model,
                 messages=message,
@@ -103,13 +118,22 @@ class ShopAssistant:
             {'role': 'system', 'content': self.template.format(
                 self.delimiter, self.delimiter, self.list_of_products, self.delimiter, self.delimiter,
                 self.delimiter, self.delimiter,
-                self.delimiter)
+                self.delimiter, self.delimiter)
              },
             {'role': 'user', 'content': f"{self.delimiter}{messages}{self.delimiter}"}
         ]
         if self.context:
             msg.append({'role': 'assistant', 'content': self.context})
         return msg
+
+    def make_context(self, message, answer):
+        if self.user_name not in context_cache:
+            context_cache.update({self.user_name: [{"message": message, "answer": answer}]})
+        else:
+            context_cache[self.user_name].append({"message": message, "answer": answer})
+
+        for item in context_cache[self.user_name]:
+            self.context = self.context + f"{item['message']} \n {item['answer']} \n"
 
 
 assistant = ShopAssistant(
@@ -118,8 +142,13 @@ assistant = ShopAssistant(
 )
 
 # case scenario when we know that user is looking only for TV
-user_context = assistant.generate_output_string(data_list=assistant.get_products_by_category("TV"))
-print(user_context)
+# tv_filtered_product_list = assistant.generate_output_string(data_list=assistant.get_products_by_category("TV"))
+# assistant.list_of_products = tv_filtered_product_list
+# assistant.context = "I don't like Panasonic tvs."
+# # print(user_context)
+#
+# user_message = 'Customer: Hello, I want to buy a new TV with big screen.'
+# print(assistant.get_completion_from_messages(messages=user_message))
 
-user_message = 'Customer: Hello, I want to buy a new TV with big screen.'
-print(assistant.get_completion_from_messages(messages=user_message))
+# run assistan in conversation mode with previous answers and questions cached as context
+assistant.main()
