@@ -1,4 +1,5 @@
 ```Online store chatbot using OpenAI AI```
+Work in progress :construction_worker:
 
 It's a simple application run in the shell. It's a chatbot that can help you to find the product you want to buy.
 It uses predefined system information for structure and better performance. For storing and retrieving context data of 
