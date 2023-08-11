@@ -1,7 +1,6 @@
 import json
 import os
 import openai
-import tiktoken
 from dotenv import load_dotenv, find_dotenv
 
 from context_cache import make_context, get_context
@@ -14,6 +13,9 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
 class ShopAssistant:
+    """
+    Shop assistant class. This class is responsible for running the chatbot in conversation mode.
+    """
     delimiter = "####"
 
     def __init__(self, template=None, list_of_products=None, moderation=True):
@@ -28,6 +30,10 @@ class ShopAssistant:
         self.max_tokens = 500
 
     def main(self):
+        """
+        Main function of the class. Runs the chatbot in conversation mode.
+        :return:
+        """
         self.user_name = input("What is your name? ")
         while True:
             print('(type exit to quit)')
@@ -41,6 +47,11 @@ class ShopAssistant:
             print(final_answer)
 
     def get_completion_from_messages(self, messages):
+        """
+        Gets the completion from the messages.
+        :param messages: user message
+        :return: full response from the model with context and hidden layer
+        """
         moderation_flagged = self.get_moderation_pass(messages)
         message = self.get_message(messages)
         if self.moderation and not moderation_flagged:
@@ -48,18 +59,33 @@ class ShopAssistant:
                 model=self.model,
                 messages=message,
                 temperature=self.temp,  # this is the degree of randomness of the model's output
-                max_tokens=self.max_tokens,  # the maximum number of tokens the model can ouptut
+                max_tokens=self.max_tokens,  # the maximum number of tokens the model can output
             )
             return response.choices[0].message["content"]
         return {"error": "message failed moderation"}, 400
 
     def get_product_by_name(self, name):
+        """
+        Gets a product by name.
+        :param name: product name
+        :return: product object(dict)
+        """
         return self.list_of_products.get(name, None)
 
     def get_products_by_category(self, category):
+        """
+        Gets all products by category.
+        :param category: category
+        :return: List[products]
+        """
         return [product for product in self.list_of_products.values() if product["category"] == category]
 
     def get_only_final_answer(self, msg):
+        """
+        Gets the final answer from the message.
+        :param msg: user message
+        :return: only the final answer without hidden layer and context
+        """
         try:
             final_response = msg.split(self.delimiter)[-1].strip()
         except Exception as e:
@@ -69,10 +95,20 @@ class ShopAssistant:
 
     @staticmethod
     def get_moderation_pass(msg):
+        """
+        Checks if the message passes the moderation check from OpenAI.
+        :param msg: user message
+        :return: Boolean
+        """
         return openai.Moderation.create(input=msg)["results"][0]['flagged']
 
     @staticmethod
     def read_string_to_list(input_string):
+        """
+        Reads a string and converts it to a list of dictionaries.
+        :param input_string: string input
+        :return: Dict[dictionary] or None
+        """
         if input_string is None:
             return None
 
@@ -115,6 +151,11 @@ class ShopAssistant:
         return output_string
 
     def get_message(self, messages):
+        """
+        Makes a message for the AI to process (with visible and hidden layer of message).
+        :param messages: user message
+        :return: full formated message with system pre-prompt and possible context
+        """
         msg = [
             {'role': 'system', 'content': self.template.format(
                 self.delimiter, self.delimiter, self.list_of_products, self.delimiter, self.delimiter,
