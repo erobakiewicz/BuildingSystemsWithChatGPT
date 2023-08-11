@@ -1,4 +1,4 @@
-template_electronic_shop = """You will be provided with customer service messages and your job is to respond to them.
+template_electronics_shop = """You will be provided with customer service messages and your job is to respond to them.
 The messages will be provided in the following format:
 {}
 Customer: Hello, I have a problem with my order.

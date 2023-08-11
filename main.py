@@ -4,9 +4,9 @@ import openai
 import tiktoken
 from dotenv import load_dotenv, find_dotenv
 
-from context_cache import context_cache
+from context_cache import make_context, get_context
 from products import product_list_electronics
-from template import template_electronic_shop
+from template import template_electronics_shop
 
 _ = load_dotenv(find_dotenv())
 
@@ -16,9 +16,9 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 class ShopAssistant:
     delimiter = "####"
 
-    def __init__(self, template=None, list_of_products=None, context='', moderation=True):
+    def __init__(self, template=None, list_of_products=None, moderation=True):
         self.user_name = None
-        self.context = context
+        self.context = None
         self.template = template
         self.list_of_products = list_of_products
         self.moderation = moderation
@@ -36,8 +36,9 @@ class ShopAssistant:
                 print("Bye!")
                 exit()
             answer = self.get_completion_from_messages(question)
-            self.make_context(question, answer)
-            print(self.get_only_final_answer(answer))
+            final_answer = self.get_only_final_answer(answer)
+            make_context(self.user_name, question, final_answer)
+            print(final_answer)
 
     def get_completion_from_messages(self, messages):
         moderation_flagged = self.get_moderation_pass(messages)
@@ -122,23 +123,16 @@ class ShopAssistant:
              },
             {'role': 'user', 'content': f"{self.delimiter}{messages}{self.delimiter}"}
         ]
+        self.context = get_context(self.user_name)
         if self.context:
             msg.append({'role': 'assistant', 'content': self.context})
         return msg
 
-    def make_context(self, message, answer):
-        if self.user_name not in context_cache:
-            context_cache.update({self.user_name: [{"message": message, "answer": answer}]})
-        else:
-            context_cache[self.user_name].append({"message": message, "answer": answer})
 
-        for item in context_cache[self.user_name]:
-            self.context = self.context + f"{item['message']} \n {item['answer']} \n"
-
-
+# create shop assistant instance
 assistant = ShopAssistant(
     list_of_products=product_list_electronics,
-    template=template_electronic_shop,
+    template=template_electronics_shop,
 )
 
 # case scenario when we know that user is looking only for TV
@@ -150,5 +144,5 @@ assistant = ShopAssistant(
 # user_message = 'Customer: Hello, I want to buy a new TV with big screen.'
 # print(assistant.get_completion_from_messages(messages=user_message))
 
-# run assistan in conversation mode with previous answers and questions cached as context
+# run assistant in conversation mode with previous answers and questions cached as context
 assistant.main()
