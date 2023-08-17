@@ -1,5 +1,7 @@
 import json
 import os
+import sys
+
 import openai
 from dotenv import load_dotenv, find_dotenv
 
@@ -38,7 +40,7 @@ class ShopAssistant:
             question = input("Question: ")
             if question == "exit":
                 print("Bye!")
-                exit()
+                sys.exit()
             answer = self.get_completion_from_messages(question)
             if answer.get("status_code") == 400:
                 print(answer.get("error_message"))
@@ -46,14 +48,6 @@ class ShopAssistant:
             final_answer = self.get_only_final_answer(answer.get('content'))
             make_context(self.user_name, question, final_answer)
             print(final_answer)
-
-    @staticmethod
-    def get_list_of_products(*args, **kwargs):
-        """
-        Gets the list of products. Updates the list of products if update is True (on class initialization).
-        :return: list of products
-        """
-        return get_products_from_db(*args, **kwargs)
 
     def get_completion_from_messages(self, messages):
         """
@@ -105,63 +99,6 @@ class ShopAssistant:
 
         return final_response
 
-    @staticmethod
-    def get_moderation_pass(msg):
-        """
-        Checks if the message passes the moderation check from OpenAI.
-        :param msg: user message
-        :return: Boolean
-        """
-        return openai.Moderation.create(input=msg)["results"][0]['flagged']
-
-    @staticmethod
-    def read_string_to_list(input_string):
-        """
-        Reads a string and converts it to a list of dictionaries.
-        :param input_string: string input
-        :return: Dict[dictionary] or None
-        """
-        if input_string is None:
-            return None
-
-        try:
-            if isinstance(input_string, dict):
-                input_string = json.dumps(input_string)
-            input_string = input_string.replace("'", "\"")  # Replace single quotes with double quotes for valid JSON
-            data = json.loads(input_string)
-            return data
-        except json.JSONDecodeError:
-            print("Error: Invalid JSON string")
-            return None
-
-    def generate_output_string(self, data_list):
-        output_string = ""
-
-        if data_list is None:
-            return output_string
-
-        for data in data_list:
-            try:
-                if "products" in data:
-                    products_list = data["products"]
-                    for product_name in products_list:
-                        product = self.get_product_by_name(product_name)
-                        if product:
-                            output_string += json.dumps(product, indent=4) + "\n"
-                        else:
-                            print(f"Error: Product '{product_name}' not found")
-                elif "category" in data:
-                    category_name = data["category"]
-                    category_products = self.get_products_by_category(category_name)
-                    for product in category_products:
-                        output_string += json.dumps(product, indent=4) + "\n"
-                else:
-                    print("Error: Invalid object format")
-            except Exception as e:
-                print(f"Error: {e}")
-
-        return output_string
-
     def get_message(self, messages):
         """
         Makes a message for the AI to process (with visible and hidden layer of message).
@@ -180,6 +117,23 @@ class ShopAssistant:
         if self.context:
             msg.append({'role': 'assistant', 'content': self.context})
         return msg
+
+    @staticmethod
+    def get_list_of_products(*args, **kwargs):
+        """
+        Gets the list of products. Updates the list of products if update is True (on class initialization).
+        :return: list of products
+        """
+        return get_products_from_db(*args, **kwargs)
+
+    @staticmethod
+    def get_moderation_pass(msg):
+        """
+        Checks if the message passes the moderation check from OpenAI.
+        :param msg: user message
+        :return: Boolean
+        """
+        return openai.Moderation.create(input=msg)["results"][0]['flagged']
 
 
 # create shop assistant instance
