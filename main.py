@@ -3,8 +3,7 @@ import os
 import openai
 from dotenv import load_dotenv, find_dotenv
 
-from context_cache import make_context, get_context
-from products import product_list_electronics
+from context_cache import make_context, get_context, get_products_from_db
 from template import template_electronics_shop
 
 _ = load_dotenv(find_dotenv())
@@ -18,13 +17,12 @@ class ShopAssistant:
     """
     delimiter = "####"
 
-    def __init__(self, template=None, list_of_products=None, moderation=True):
+    def __init__(self, template=None, moderation=True, **kwargs):
+        self.list_of_products = self.get_list_of_products(True)
         self.user_name = None
         self.context = None
         self.template = template
-        self.list_of_products = list_of_products
         self.moderation = moderation
-        self.products = None
         self.temp = 0
         self.model = "gpt-3.5-turbo"
         self.max_tokens = 500
@@ -42,9 +40,20 @@ class ShopAssistant:
                 print("Bye!")
                 exit()
             answer = self.get_completion_from_messages(question)
-            final_answer = self.get_only_final_answer(answer)
+            if answer.get("status_code") == 400:
+                print(answer.get("error_message"))
+                continue
+            final_answer = self.get_only_final_answer(answer.get('content'))
             make_context(self.user_name, question, final_answer)
             print(final_answer)
+
+    @staticmethod
+    def get_list_of_products(*args, **kwargs):
+        """
+        Gets the list of products. Updates the list of products if update is True (on class initialization).
+        :return: list of products
+        """
+        return get_products_from_db(*args, **kwargs)
 
     def get_completion_from_messages(self, messages):
         """
@@ -61,8 +70,11 @@ class ShopAssistant:
                 temperature=self.temp,  # this is the degree of randomness of the model's output
                 max_tokens=self.max_tokens,  # the maximum number of tokens the model can output
             )
-            return response.choices[0].message["content"]
-        return {"error": "message failed moderation"}, 400
+            return {"content": response.choices[0].message["content"], "status_code": 200}
+        return {
+            "error_message": "The question is appropriate, please ask something else.",
+            "status_code": 400
+        }
 
     def get_product_by_name(self, name):
         """
@@ -88,7 +100,7 @@ class ShopAssistant:
         """
         try:
             final_response = msg.split(self.delimiter)[-1].strip()
-        except Exception as e:
+        except ConnectionError:
             final_response = "Sorry, I'm having trouble right now, please try asking another question."
 
         return final_response
@@ -154,7 +166,7 @@ class ShopAssistant:
         """
         Makes a message for the AI to process (with visible and hidden layer of message).
         :param messages: user message
-        :return: full formated message with system pre-prompt and possible context
+        :return: full formatted message with system pre-prompt and possible context
         """
         msg = [
             {'role': 'system', 'content': self.template.format(
@@ -172,18 +184,8 @@ class ShopAssistant:
 
 # create shop assistant instance
 assistant = ShopAssistant(
-    list_of_products=product_list_electronics,
     template=template_electronics_shop,
 )
-
-# case scenario when we know that user is looking only for TV
-# tv_filtered_product_list = assistant.generate_output_string(data_list=assistant.get_products_by_category("TV"))
-# assistant.list_of_products = tv_filtered_product_list
-# assistant.context = "I don't like Panasonic tvs."
-# # print(user_context)
-#
-# user_message = 'Customer: Hello, I want to buy a new TV with big screen.'
-# print(assistant.get_completion_from_messages(messages=user_message))
 
 # run assistant in conversation mode with previous answers and questions cached as context
 assistant.main()

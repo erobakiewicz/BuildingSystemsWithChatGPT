@@ -1,7 +1,23 @@
 from pymongo import MongoClient
 
+from products import product_list_electronics
+
 client = MongoClient()
+products = client.chatbot.products
 context_cache = client.chatbot.context_cache.users
+
+
+def get_products_from_db(update=False):
+    """ Updates db if any new products and checks the database for a list of products.
+    :return: list of products
+    """
+    if update:
+        if not products.find_one({"name": "products_list"}):
+            products.insert_one({"name": "products_list", "products": product_list_electronics})
+        else:
+            products.find_one_and_update({"name": "products_list"}, {"$set": {"products": product_list_electronics}})
+    product_list = products.find_one({"name": "products_list"})
+    return product_list
 
 
 def make_context(user_name, message, answer):
