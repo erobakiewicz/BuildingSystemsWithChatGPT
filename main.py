@@ -136,10 +136,10 @@ class ShopAssistant:
         return openai.Moderation.create(input=msg)["results"][0]['flagged']
 
 
-# create shop assistant instance
-assistant = ShopAssistant(
-    template=template_electronics_shop,
-)
-
-# run assistant in conversation mode with previous answers and questions cached as context
-assistant.main()
+if __name__ == '__main__':
+    # create shop assistant instance
+    assistant = ShopAssistant(
+        template=template_electronics_shop,
+    )
+    # run assistant in conversation mode with previous answers and questions cached as context
+    assistant.main()
